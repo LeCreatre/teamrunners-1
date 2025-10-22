@@ -6,174 +6,94 @@
 <title>TEAM Runners</title>
 <style>
   :root{
-    --brand-red:#C9301F;  /* C9301F */
-    --brand-blue:#132766; /* 132766 */
+    --red:#C9301F;
+    --blue:#132766;
+    --ink:#0d1024;
     --bg:#ffffff;
-    --ink:#0f1222;
-    --good:#17b169;
-    --bad:#e23e57;
+    --muted:#667085;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
-  .page{
-    min-height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-    background:
-      radial-gradient(1200px 800px at 80% -10%, rgba(201,48,31,0.12), transparent 60%),
-      radial-gradient(1200px 900px at -10% 100%, rgba(19,39,102,0.10), transparent 60%),
-      var(--bg);
+  .wrap{
+    min-height:100%;display:flex;align-items:center;justify-content:center;padding:16px;
+    background: radial-gradient(1200px 800px at 80% -10%, rgba(201,48,31,.10), transparent 60%),
+                radial-gradient(1200px 900px at -10% 100%, rgba(19,39,102,.10), transparent 60%),
+                #f8fafc;
   }
-  .frame{
-    position:relative;
-    width:min(95vw, 140vh);
-    aspect-ratio:16/9;
-    border-radius:20px;
-    background:#fff;
-    box-shadow:0 20px 60px rgba(19,39,102,0.25), inset 0 0 0 1px rgba(19,39,102,0.08);
-    overflow:hidden;
+  .stage{
+    width:min(96vw, 140vh); aspect-ratio:16/9; position:relative; overflow:hidden; border-radius:20px;
+    background:#fff; box-shadow:0 24px 70px rgba(19,39,102,.25), inset 0 0 0 1px rgba(19,39,102,.08);
   }
-  /* Canvas at native 1920x1080, scaled to fit */
-  #game {
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    image-rendering:pixelated; /* пиксельный вайб */
-    background:#fff;
-  }
+
+  /* CANVAS */
+  #game{position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; background:#fff;}
 
   /* HUD */
-  .hud{
-    position:absolute; inset:0;
-    pointer-events:none;
-    display:flex; flex-direction:column; justify-content:space-between;
-    padding:18px 20px;
-  }
-  .topbar{
-    display:flex; align-items:center; gap:12px; justify-content:space-between;
-  }
-  .badge{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:8px 12px; border-radius:999px;
-    background:rgba(19,39,102,0.08); color:var(--brand-blue);
-    font-weight:700; letter-spacing:.2px; font-size:14px;
-    box-shadow:inset 0 0 0 1px rgba(19,39,102,0.12);
-  }
-  .score{
-    display:flex; gap:10px; align-items:center;
-    font-variant-numeric:tabular-nums;
-    background:rgba(201,48,31,0.08);
-    color:var(--brand-red);
-    padding:8px 12px; border-radius:10px; font-weight:800;
-    box-shadow:inset 0 0 0 1px rgba(201,48,31,0.18);
-  }
-  .score small{opacity:.7; font-weight:700}
+  .hud{position:absolute; inset:0; pointer-events:none; padding:18px 20px; display:flex; flex-direction:column; justify-content:space-between;}
+  .top{display:flex; gap:10px; align-items:center; justify-content:space-between}
+  .chip{pointer-events:auto; display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:999px; font-weight:800; letter-spacing:.2px; font-size:14px}
+  .chip.blue{background:rgba(19,39,102,.08); color:var(--blue); box-shadow:inset 0 0 0 1px rgba(19,39,102,.12)}
+  .chip.red{background:rgba(201,48,31,.08); color:var(--red); box-shadow:inset 0 0 0 1px rgba(201,48,31,.18)}
+  .muted{color:var(--muted)}
 
-  /* Panels */
-  .panel{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
-    backdrop-filter:saturate(120%) blur(8px);
-    padding:24px;
-  }
-  .card{
-    width:min(720px, 92%);
-    background:#fff; border-radius:18px; padding:22px 22px 18px;
-    box-shadow:0 20px 60px rgba(19,39,102,0.22), inset 0 0 0 1px rgba(19,39,102,0.08);
-  }
-  .card h1{margin:0 0 10px; font-size:28px; color:var(--brand-blue)}
-  .muted{color:#334; opacity:.8; line-height:1.45}
-  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:14px}
-  .pill{
-    padding:8px 12px; border-radius:999px; background:rgba(19,39,102,0.06);
-    color:var(--brand-blue); font-weight:700; font-size:13px;
-  }
-  .cta{
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    border:0; cursor:pointer; padding:12px 16px; border-radius:12px;
-    font-weight:800; letter-spacing:.2px;
-    background:linear-gradient(135deg, var(--brand-red), #b12a1b);
-    color:#fff; box-shadow:0 10px 30px rgba(201,48,31,0.45);
-    transition:transform .08s ease;
-  }
-  .cta:active{transform:translateY(1px)}
-  .cta.alt{
-    background:linear-gradient(135deg, var(--brand-blue), #08153f);
-    box-shadow:0 10px 30px rgba(19,39,102,0.45);
-  }
-  input[type="text"]{
-    width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(19,39,102,0.2);
-    font-size:16px; outline:none;
-  }
+  /* PANELS */
+  .panel{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75)); backdrop-filter:blur(8px) saturate(120%);
+    padding:20px;}
+  .card{width:min(720px, 92%); background:#fff; border-radius:18px; padding:22px; box-shadow:0 20px 60px rgba(19,39,102,.22), inset 0 0 0 1px rgba(19,39,102,.08)}
+  h1{margin:0 0 10px; color:var(--blue); font-size:28px}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  input[type="text"]{width:100%; padding:12px 14px; border:1px solid rgba(19,39,102,.2); border-radius:12px; outline:none; font-size:16px}
+  .btn{pointer-events:auto; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:12px; border:0; cursor:pointer; font-weight:900; letter-spacing:.2px}
+  .btn.red{background:linear-gradient(135deg, var(--red), #b12a1b); color:#fff; box-shadow:0 10px 30px rgba(201,48,31,.45)}
+  .btn.blue{background:linear-gradient(135deg, var(--blue), #09133f); color:#fff; box-shadow:0 10px 30px rgba(19,39,102,.45)}
+  .btn.ghost{background:transparent; color:var(--blue); border:1px solid rgba(19,39,102,.25)}
+  .btn:active{transform:translateY(1px)}
 
-  /* Leaderboard */
-  .table{
-    width:100%; border-collapse:separate; border-spacing:0 10px; margin-top:12px;
-    font-variant-numeric:tabular-nums;
-  }
-  .table tr{background:#f7f9ff}
+  /* LEADERBOARD */
+  .table{width:100%; border-collapse:separate; border-spacing:0 8px; margin-top:10px; font-variant-numeric:tabular-nums}
+  .table tr{background:#f6f8ff}
   .table tr.me{background:#fff3f1}
   .table td{padding:10px 12px}
-  .table .pos{width:56px; text-align:center; font-weight:800; color:var(--brand-blue)}
-  .table .nick{font-weight:800; color:#142}
-  .table .val{font-weight:900; color:var(--brand-red)}
-  .toolbar{display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top:12px}
-  .ghost{background:transparent; border:1px solid rgba(19,39,102,0.25); color:var(--brand-blue)}
+  .pos{width:50px; text-align:center; font-weight:900; color:var(--blue)}
+  .nick{font-weight:900}
+  .val{font-weight:900; color:var(--red)}
 
-  /* Toast */
-  .toast{
-    position:absolute; left:50%; top:10%; transform:translateX(-50%);
-    background:#10142a; color:#fff; padding:10px 14px; border-radius:12px;
-    box-shadow:0 12px 24px rgba(0,0,0,.25); font-weight:700; display:none;
-  }
+  /* TOAST */
+  .toast{position:absolute; left:50%; top:10%; transform:translateX(-50%); background:#10142a; color:#fff; padding:10px 14px; border-radius:12px; display:none}
   .toast.show{display:block; animation:pop .9s ease}
-  @keyframes pop{0%{transform:translate(-50%,-10px);opacity:0}20%{opacity:1}80%{opacity:1}100%{opacity:0}}
-
-  /* Controls hint */
-  .hint{font-size:13px; opacity:.75}
-
-  /* Mobile tweaks */
-  @media (max-width:720px){
-    .card h1{font-size:22px}
-  }
+  @keyframes pop{0%{transform:translate(-50%,-10px); opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{opacity:0}}
 </style>
 </head>
 <body>
-<div class="page">
-  <div class="frame">
+<div class="wrap">
+  <div class="stage">
     <canvas id="game" width="1920" height="1080"></canvas>
 
     <div class="hud">
-      <div class="topbar">
-        <div class="badge" id="nickBadge">👤 Ник: —</div>
-        <div class="score"><small>Счёт</small> <span id="score">0</span></div>
-        <div class="score"><small>Рекорд</small> <span id="best">0</span></div>
+      <div class="top">
+        <div class="chip blue" id="nickBadge">👤 Ник: —</div>
+        <div style="display:flex; gap:10px">
+          <div class="chip red"><span class="muted">Счёт</span>&nbsp;<b id="score">0</b></div>
+          <div class="chip blue"><span class="muted">Рекорд</span>&nbsp;<b id="best">0</b></div>
+        </div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-end">
-        <div class="badge hint">␣ Пробел / ▲ Вверх / Тап — прыжок</div>
-        <div class="badge hint">Скорость растёт. Перепрыгивай всё. Не спотыкайся 🙃</div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end">
+        <div class="chip blue muted">␣ / ▲ / Тап — прыжок • Скорость растёт</div>
+        <button class="btn ghost" id="btnLb" style="pointer-events:auto">🏆 Лидерборд</button>
       </div>
     </div>
 
-    <!-- START PANEL -->
-    <div class="panel" id="startPanel" aria-hidden="false">
+    <!-- START -->
+    <div class="panel" id="startPanel">
       <div class="card">
         <h1>TEAM Runners</h1>
-        <p class="muted">Перепрыгивай препятствия и выживай как можно дольше. Скорость растёт, город движется, а твой рекорд — в таблице лидеров.</p>
-        <div class="row">
-          <span class="pill">16:9 • 1920×1080</span>
-          <span class="pill">Параллакс-город</span>
-          <span class="pill">Лидерборд 3000+</span>
-          <span class="pill">Звуки и частицы</span>
+        <p class="muted">Новый минималистичный раннер в бренд-цветах TEAM. Перепрыгивай, держи ритм, забирай место в топе.</p>
+        <div class="row" style="margin-top:12px">
+          <input id="nickInput" type="text" maxlength="20" placeholder="Никнейм (латиница/цифры/пробелы)" />
+          <button class="btn red" id="startBtn">▶ Начать</button>
+          <button class="btn blue" id="openLbBtn">🏆 Лидерборд</button>
         </div>
-        <div class="row" style="margin-top:18px">
-          <input id="nickInput" type="text" maxlength="20" placeholder="Введи никнейм (латиница/цифры/пробелы)" />
-          <button class="cta" id="startBtn">▶ Начать</button>
-          <button class="cta alt" id="openLbBtn">🏆 Лидерборд</button>
-        </div>
-        <p class="hint" style="margin-top:10px">Подсказка: удерживай клавишу — прыжок будет выше. На телефоне работает тач.</p>
       </div>
     </div>
 
@@ -181,12 +101,11 @@
     <div class="panel" id="overPanel" style="display:none">
       <div class="card">
         <h1>Игра окончена</h1>
-        <p class="muted">Твой счёт: <b id="finalScore">0</b> • Лучший: <b id="finalBest">0</b></p>
-        <div class="row">
-          <button class="cta" id="retryBtn">↻ Ещё раз</button>
-          <button class="cta alt" id="lbBtn2">🏆 Лидерборд</button>
+        <p class="muted">Счёт: <b id="finalScore">0</b> • Лучший: <b id="finalBest">0</b></p>
+        <div class="row" style="margin-top:10px">
+          <button class="btn red" id="retryBtn">↻ Ещё раз</button>
+          <button class="btn blue" id="lbBtn2">🏆 Лидерборд</button>
         </div>
-        <p class="hint">Совет: прыгай чуть раньше, чем кажется «логичным». Мозг привыкает — скорость уже другая.</p>
       </div>
     </div>
 
@@ -194,13 +113,13 @@
     <div class="panel" id="lbPanel" style="display:none">
       <div class="card">
         <h1>🏆 Лидерборд</h1>
-        <div class="toolbar">
-          <button class="cta ghost" id="backBtn">← Назад</button>
-          <button class="cta" id="renameBtn">✎ Сменить ник</button>
-          <button class="cta alt" id="resetBtn">🧹 Сбросить рекорды (локально)</button>
+        <div class="row" style="justify-content:flex-end; margin:6px 0 10px">
+          <button class="btn ghost" id="backBtn">← Назад</button>
+          <button class="btn blue" id="renameBtn">✎ Сменить ник</button>
+          <button class="btn red" id="resetBtn">🧹 Сбросить локальные данные</button>
         </div>
         <table class="table" id="lbTable"></table>
-        <p class="hint">Данные хранятся локально в браузере (offline). Для общего серверного рейтинга подключим API — код к этому готов.</p>
+        <p class="muted" style="margin-top:8px">Лидерборд хранит **лучший счёт на ник** в браузере. Старые дубли автоматически объединены.</p>
       </div>
     </div>
 
@@ -210,11 +129,9 @@
 
 <script>
 /* =========================
-   TEAM Runners — Single file
-   Author: you & gpt (2025)
+   TEAM Runners — clean build
    ========================= */
 
-/* ---------- Utilities ---------- */
 const BRAND_RED = '#C9301F';
 const BRAND_BLUE = '#132766';
 const BG = '#ffffff';
@@ -222,668 +139,260 @@ const BG = '#ffffff';
 const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
 const rand = (a,b)=>Math.random()*(b-a)+a;
 const chance = p=>Math.random()<p;
-
 function lerp(a,b,t){return a+(b-a)*t;}
 function now(){return performance.now();}
 
-/* ---------- Audio: lightweight WebAudio beeps (no assets) ---------- */
+/* ---------- Audio (no files) ---------- */
 class Sound {
-  constructor(){ 
-    this.actx = null;
-    try{ this.actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  constructor(){try{this.actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  beep({f=600,d=0.08,t='square',g=0.05,a=0.005,r=0.02,s=0}={}){ if(!this.actx) return;
+    const c=this.actx, t0=c.currentTime, o=c.createOscillator(), gn=c.createGain();
+    o.type=t; o.frequency.setValueAtTime(f,t0); if(s) o.frequency.exponentialRampToValueAtTime(Math.max(40,f+s),t0+d);
+    gn.gain.setValueAtTime(0,t0); gn.gain.linearRampToValueAtTime(g,t0+a); gn.gain.setValueAtTime(g,t0+d-r); gn.gain.linearRampToValueAtTime(0,t0+d);
+    o.connect(gn); gn.connect(c.destination); o.start(t0); o.stop(t0+d+.02);
   }
-  beep({freq=600, dur=0.08, type='square', gain=0.05, attack=0.005, release=0.02, slide=0}={}){
-    if(!this.actx) return;
-    const t0 = this.actx.currentTime;
-    const osc = this.actx.createOscillator();
-    const g = this.actx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, t0);
-    if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide), t0+dur);
-    g.gain.setValueAtTime(0, t0);
-    g.gain.linearRampToValueAtTime(gain, t0+attack);
-    g.gain.setValueAtTime(gain, t0+dur-release);
-    g.gain.linearRampToValueAtTime(0, t0+dur);
-    osc.connect(g); g.connect(this.actx.destination);
-    osc.start(t0); osc.stop(t0+dur+0.02);
-  }
-  jump(){ this.beep({freq:520, dur:0.09, type:'square', gain:0.06, slide:120}); }
-  hit(){ this.beep({freq:160, dur:0.12, type:'sawtooth', gain:0.08, slide:-140}); }
-  tick(){ this.beep({freq:880, dur:0.05, type:'triangle', gain:0.045}); }
-  milestone(){ this.beep({freq:640, dur:0.25, type:'square', gain:0.07, slide:260}); }
+  jump(){this.beep({f:520,d:.09,t:'square',g:.06,s:120});}
+  hit(){this.beep({f:160,d:.12,t:'sawtooth',g:.08,s:-140});}
+  tick(){this.beep({f:880,d:.05,t:'triangle',g:.045});}
+  milestone(){this.beep({f:640,d:.25,t:'square',g:.07,s:260});}
 }
 const SND = new Sound();
 
-/* ---------- Storage & Leaderboard ---------- */
-const KEY = 'TEAM_RUNNERS_V1';
-const LBKEY = 'TEAM_RUNNERS_LB_V1';
-const MAX_LB = 3000;
-
+/* ---------- Storage with per-nick BEST aggregation ---------- */
+const KEY  = 'TR_STATE_V2';
+const LBKEY= 'TR_LB_V2'; // хранит объект {nick:{score,ts}}
 const store = {
-  load(){
-    try{ return JSON.parse(localStorage.getItem(KEY)) || {nick:'', best:0}; }
-    catch(e){ return {nick:'', best:0}; }
+  state(){ try{return JSON.parse(localStorage.getItem(KEY))||{nick:'',best:0};}catch(e){return {nick:'',best:0};} },
+  saveState(s){ localStorage.setItem(KEY, JSON.stringify(s)); },
+  getLB(){
+    // миграция со старого формата (массив) в объект
+    let raw=null; try{ raw = JSON.parse(localStorage.getItem(LBKEY)); }catch(e){}
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) return raw;
+
+    // пробуем старые ключи
+    let legacy=null; try{ legacy = JSON.parse(localStorage.getItem('TEAM_RUNNERS_LB_V1')); }catch(e){}
+    const agg = {};
+    if (Array.isArray(legacy)){
+      for (const r of legacy){
+        const n = (r.nick||'Player').toString().slice(0,20);
+        const sc = +r.score||0;
+        if (!agg[n] || sc > agg[n].score) agg[n] = {score:sc, ts:r.ts||Date.now()};
+      }
+      localStorage.setItem(LBKEY, JSON.stringify(agg));
+      localStorage.removeItem('TEAM_RUNNERS_LB_V1');
+    }
+    return JSON.parse(localStorage.getItem(LBKEY)) || {};
   },
-  save(data){
-    localStorage.setItem(KEY, JSON.stringify(data));
+  setBest(nick, score){
+    const n = (nick||'Player').toString().trim().slice(0,20).replace(/[^A-Za-z0-9 _.-]/g,'') || 'Player';
+    const lb = this.getLB();
+    if (!lb[n] || score > lb[n].score) lb[n] = {score, ts:Date.now()};
+    localStorage.setItem(LBKEY, JSON.stringify(lb));
   },
-  loadLB(){
-    try{ return JSON.parse(localStorage.getItem(LBKEY)) || []; }
-    catch(e){ return []; }
-  },
-  saveLB(arr){
-    if (!Array.isArray(arr)) return;
-    // keep top MAX_LB
-    arr.sort((a,b)=>b.score-a.score);
-    if (arr.length>MAX_LB) arr.length = MAX_LB;
-    localStorage.setItem(LBKEY, JSON.stringify(arr));
-  },
-  pushLB(entry){
-    const lb = store.loadLB();
-    lb.push(entry);
-    store.saveLB(lb);
-  },
-  reset(){
-    localStorage.removeItem(KEY);
-    localStorage.removeItem(LBKEY);
-  }
+  reset(){ localStorage.removeItem(KEY); localStorage.removeItem(LBKEY); }
 };
 
-/* ---------- Canvas & scale ---------- */
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const W = canvas.width, H = canvas.height;
-let last = 0, dt = 0;
-let running = false, gameOver = false;
+/* ---------- Canvas ---------- */
+const cvs = document.getElementById('game'), ctx = cvs.getContext('2d');
+const W=cvs.width, H=cvs.height;
+const groundY = H-200;
+let last=0, dt=0, running=false, over=false;
 
-/* ---------- World params ---------- */
-const groundY = H - 200; // baseline
-let speed = 8.0;         // base scroll
-let difficulty = 1.0;    // scales up with time
-let score = 0;
-let best = 0;
-
-const state = store.load();
-best = state.best || 0;
+/* ---------- Game state ---------- */
+let score=0, best=0, speed=8, difficulty=1;
+const state = store.state(); best = state.best||0;
 
 /* ---------- Player ---------- */
 class Player{
-  constructor(){
-    this.reset();
-  }
-  reset(){
-    this.x = 240; this.y = groundY;
-    this.w = 60; this.h = 84;
-    this.velY = 0;
-    this.onGround = true;
-    this.jumpHold = 0;
-    this.anim = 0;
-    this.trail = [];
-  }
-  jumpStart(){
-    if (this.onGround){
-      this.velY = -18.8; // initial impulse
-      this.onGround = false;
-      this.jumpHold = 0.16; // allow short hold to jump higher
-      SND.jump();
-    }
-  }
-  jumpHoldTick(holding){
-    if (holding && this.jumpHold>0){
-      this.velY -= 0.9; // extra lift while holding
-      this.jumpHold -= dt;
-    }
-  }
-  update(){
-    this.velY += 0.95; // gravity
-    this.y += this.velY;
-    if (this.y >= groundY){
-      this.y = groundY;
-      this.velY = 0;
-      this.onGround = true;
-    }
-    this.anim += dt* (10 + speed*0.5);
-
-    // trail particles
-    if (this.onGround && chance(0.5*dt)){
-      Particles.spawn(this.x-10, this.y+this.h-6, BRAND_RED, 10, -1, rand(1,2));
-    }
-  }
+  constructor(){this.reset();}
+  reset(){this.x=240; this.y=groundY; this.w=60; this.h=84; this.vy=0; this.onGround=true; this.hold=0.16; this.anim=0;}
+  startJump(){if(this.onGround){this.vy=-18.8; this.onGround=false; this.hold=0.16; SND.jump();}}
+  holdJump(hold){ if(hold && this.hold>0){ this.vy -= 0.9; this.hold -= dt; } }
+  update(){ this.vy += 0.95; this.y += this.vy; if(this.y>=groundY){this.y=groundY; this.vy=0; this.onGround=true;} this.anim += dt*(10+speed*.5); }
   draw(){
-    // body (pixel-ish rectangles)
-    const x = this.x, y = this.y, w = this.w, h = this.h;
-
+    const x=this.x,y=this.y,w=this.w,h=this.h;
     // shadow
-    ctx.fillStyle = 'rgba(0,0,0,.12)';
-    const sw = 90, sh = 14, sx = x+10, sy = groundY+h-6;
-    ctx.beginPath();
-    ctx.ellipse(sx, sy, sw, sh, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // legs (swing)
-    const phase = Math.sin(this.anim*0.4);
-    ctx.fillStyle = BRAND_RED;
-    ctx.fillRect(x+18, y+h-30, 16, 28);
-    ctx.fillRect(x+28 + phase*6, y+h-30, 16, 28);
-
+    ctx.fillStyle='rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(x+10, groundY+h-6, 90, 14, 0, 0, Math.PI*2); ctx.fill();
+    // legs
+    const ph=Math.sin(this.anim*.45); ctx.fillStyle=BRAND_RED;
+    ctx.fillRect(x+18, y+h-30, 16, 28); ctx.fillRect(x+28+ph*6, y+h-30, 16, 28);
     // torso
-    ctx.fillStyle = BRAND_RED;
     ctx.fillRect(x+12, y+28, 40, 40);
-
     // head
-    ctx.fillStyle = BRAND_BLUE;
-    ctx.fillRect(x+18, y, 30, 28);
-
+    ctx.fillStyle=BRAND_BLUE; ctx.fillRect(x+18, y, 30, 28);
     // eye
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x+40, y+8, 6, 6);
-    ctx.fillStyle = '#111';
-    ctx.fillRect(x+42, y+10, 3, 3);
-
-    // arms
-    ctx.fillStyle = BRAND_RED;
-    ctx.fillRect(x, y+36, 16, 14);
-    ctx.fillRect(x+52, y+36, 16, 14);
-
-    // accent stripe
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x+12, y+44, 40, 6);
+    ctx.fillStyle='#fff'; ctx.fillRect(x+40,y+8,6,6); ctx.fillStyle='#111'; ctx.fillRect(x+42,y+10,3,3);
+    // arms + stripe
+    ctx.fillStyle=BRAND_RED; ctx.fillRect(x, y+36, 16, 14); ctx.fillRect(x+52,y+36,16,14);
+    ctx.fillStyle='#fff'; ctx.fillRect(x+12, y+44, 40, 6);
   }
-  bbox(){ return {x:this.x+6, y:this.y+6, w:this.w-12, h:this.h-12}; }
+  bbox(){ return {x:this.x+6,y:this.y+6,w:this.w-12,h:this.h-12}; }
 }
 const player = new Player();
 
 /* ---------- Obstacles ---------- */
 class Obstacle{
-  constructor(x,type=0){
-    this.x = x;
-    this.type = type; // 0: low barrier, 1: tall barrier, 2: double, 3: sign
-    this.passed = false;
-    // height/width vary
-    if (type===0){ this.w=46; this.h=54; }
-    else if (type===1){ this.w=52; this.h=92; }
-    else if (type===2){ this.w=72; this.h=58; }
-    else { this.w=54; this.h=100; }
-    this.y = groundY + player.h - this.h;
-    this.color = type===3 ? BRAND_BLUE : BRAND_RED;
+  constructor(x,t=0){
+    this.x=x; this.t=t; this.passed=false;
+    if(t===0){this.w=46; this.h=54;}
+    else if(t===1){this.w=52; this.h=92;}
+    else if(t===2){this.w=72; this.h=58;}
+    else {this.w=54; this.h=100;}
+    this.y=groundY+player.h-this.h;
+    this.color=t===3?BRAND_BLUE:BRAND_RED;
   }
   update(){
-    this.x -= speed * (1+Math.min(0.65, difficulty*0.15));
-    if (!this.passed && this.x + this.w < player.x){
-      this.passed = true;
-      score += 10;
-      if ((score % 200)===0) SND.milestone(); else SND.tick();
-    }
+    this.x -= speed*(1+Math.min(.65, difficulty*.15));
+    if(!this.passed && this.x+this.w<player.x){ this.passed=true; score+=10; ((score%200)===0)?SND.milestone():SND.tick(); }
   }
   draw(){
-    // pole/shadow style
-    ctx.fillStyle = 'rgba(0,0,0,.15)';
-    ctx.fillRect(this.x+4, this.y+this.h-6, Math.max(20,this.w), 6);
-
-    if (this.type===3){
-      // city sign
-      ctx.fillStyle=this.color;
-      ctx.fillRect(this.x, this.y-10, this.w, this.h+10);
-      ctx.fillStyle='#fff';
-      ctx.fillRect(this.x+8, this.y, this.w-16, this.h-20);
-      ctx.fillStyle=BRAND_RED;
-      ctx.fillRect(this.x+12, this.y+12, this.w-24, 10);
-      ctx.fillStyle=BRAND_BLUE;
-      ctx.fillRect(this.x+12, this.y+28, this.w-24, 10);
+    ctx.fillStyle='rgba(0,0,0,.15)'; ctx.fillRect(this.x+4, this.y+this.h-6, Math.max(20,this.w), 6);
+    if(this.t===3){
+      ctx.fillStyle=this.color; ctx.fillRect(this.x, this.y-10, this.w, this.h+10);
+      ctx.fillStyle='#fff'; ctx.fillRect(this.x+8, this.y, this.w-16, this.h-20);
+      ctx.fillStyle=BRAND_RED; ctx.fillRect(this.x+12, this.y+12, this.w-24, 10);
+      ctx.fillStyle=BRAND_BLUE; ctx.fillRect(this.x+12, this.y+28, this.w-24, 10);
     }else{
-      // barrier blocks
-      ctx.fillStyle=this.color;
-      ctx.fillRect(this.x, this.y, this.w, this.h);
-      ctx.fillStyle='#fff3';
-      ctx.fillRect(this.x+6, this.y+6, this.w-12, 6);
-      ctx.fillStyle='#0002';
-      ctx.fillRect(this.x, this.y+this.h-6, this.w, 6);
+      ctx.fillStyle=this.color; ctx.fillRect(this.x,this.y,this.w,this.h);
+      ctx.fillStyle='#fff3'; ctx.fillRect(this.x+6,this.y+6,this.w-12,6);
+      ctx.fillStyle='#0002'; ctx.fillRect(this.x,this.y+this.h-6,this.w,6);
     }
   }
-  bbox(){ return {x:this.x+4, y:this.y+4, w:this.w-8, h:this.h-8}; }
+  bbox(){ return {x:this.x+4,y:this.y+4,w:this.w-8,h:this.h-8}; }
 }
-const obstacles = [];
-let spawnTimer = 0;
+const obstacles=[]; let spawnT=0;
 
-/* ---------- Parallax City ---------- */
-class Layer{
-  constructor(color, h, speedMul, details){
-    this.color = color; this.h = h; this.speedMul = speedMul;
-    this.details = details||[];
-    this.x = 0;
-  }
-  update(){
-    this.x -= speed * this.speedMul;
-    if (this.x <= -W) this.x += W;
-  }
-  draw(){
-    // ground rectangle
-    ctx.fillStyle = this.color;
-    ctx.fillRect(0, groundY+player.h - this.h, W, this.h);
-
-    // tiled silhouettes moving with x
-    ctx.save();
-    ctx.translate(this.x, 0);
-    this.drawTiles();
-    ctx.translate(W, 0);
-    this.drawTiles();
-    ctx.restore();
-  }
-  drawTiles(){
-    const baseY = groundY+player.h - this.h;
-    ctx.fillStyle = this.color;
-
-    // buildings as rectangles
-    for (let i=0;i<18;i++){
-      const bw = rand(80,160);
-      const bh = rand(80, 280);
-      const bx = i*120 + rand(-40,40);
-      const by = baseY - bh;
-      ctx.globalAlpha = 0.35;
-      ctx.fillRect(bx, by, bw, bh);
-      ctx.globalAlpha = 1;
-
-      // windows
-      if (chance(0.3)){
-        const rows = Math.floor(rand(2,6)), cols=Math.floor(rand(2,4));
-        const ww=10, wh=14, pad=8;
-        ctx.fillStyle = '#ffd';
-        for(let r=0;r<rows;r++){
-          for(let c=0;c<cols;c++){
-            if (chance(0.5)){ // some windows off
-              ctx.fillStyle = 'rgba(255,255,200,0.15)';
-            }else{
-              ctx.fillStyle = 'rgba(255,255,200,0.6)';
-            }
-            const wx = bx + 10 + c*(ww+pad);
-            const wy = by + 12 + r*(wh+pad);
-            ctx.fillRect(wx, wy, ww, wh);
-          }
-        }
-      }
-    }
-
-    // foreground line
-    ctx.fillStyle = 'rgba(0,0,0,.06)';
-    ctx.fillRect(0, baseY-2, W, 2);
-  }
-}
-
-const sky = {
-  draw(){
-    // clean bg
-    ctx.fillStyle = BG;
-    ctx.fillRect(0,0,W,H);
-
-    // gradient sky top
-    const g = ctx.createLinearGradient(0,0,0,H*0.6);
-    g.addColorStop(0, 'rgba(19,39,102,0.08)');
-    g.addColorStop(1, 'rgba(201,48,31,0.03)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H*0.6);
-
-    // clouds
-    Clouds.update(); Clouds.draw();
-  }
-};
-
-const layerBack = new Layer('#e9eefb', 380, 0.25);
-const layerMid  = new Layer('#d8e0f7', 240, 0.45);
-const layerFore = new Layer('#c7d2f3', 140, 0.75);
-
-/* ---------- Clouds ---------- */
-const Clouds = {
-  items: [],
-  init(){
-    for(let i=0;i<10;i++){
-      this.items.push({
-        x: rand(0,W), y: rand(40, 360),
-        s: rand(0.6,1.5), v: rand(0.3,0.7)
-      });
-    }
-  },
-  update(){
-    for (const c of this.items){
-      c.x -= c.v * (1 + speed*0.05);
-      if (c.x < -120) { c.x = W + rand(0,300); c.y = rand(40,360); c.s = rand(0.6,1.5); }
-    }
-  },
-  draw(){
-    ctx.fillStyle = 'rgba(19,39,102,0.12)';
-    for (const c of this.items){
-      drawCloud(c.x, c.y, c.s);
-    }
-  }
-};
-function drawCloud(x,y,s){
-  ctx.beginPath();
-  ctx.ellipse(x, y, 60*s, 28*s, 0, 0, Math.PI*2);
-  ctx.ellipse(x+40*s, y+6*s, 48*s, 22*s, 0, 0, Math.PI*2);
-  ctx.ellipse(x-38*s, y+8*s, 40*s, 18*s, 0, 0, Math.PI*2);
-  ctx.fill();
+/* ---------- Background (минимализм: линии + диски) ---------- */
+function drawBG(){
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  // нежный градиент
+  const g=ctx.createLinearGradient(0,0,0,H*0.6); g.addColorStop(0,'rgba(19,39,102,.08)'); g.addColorStop(1,'rgba(201,48,31,.03)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H*0.6);
+  // бегущие линии дороги
+  const Y=groundY+player.h;
+  ctx.fillStyle='#f3f5fb'; ctx.fillRect(0,Y,W,180);
+  ctx.fillStyle=BRAND_RED+'aa'; ctx.fillRect(0,Y-10,W,10);
+  ctx.fillStyle='rgba(19,39,102,.12)';
+  for(let i=0;i<W;i+=80){ ctx.fillRect((i-(now()*0.2)%80), Y+70, 48, 6); }
+  // диски-«огни города»
+  ctx.globalAlpha=.08; ctx.fillStyle=BRAND_BLUE; for(let i=0;i<8;i++){ const r=rand(40,120); ctx.beginPath(); ctx.ellipse(rand(0,W), rand(60,380), r, r*.65, 0,0,Math.PI*2); ctx.fill(); }
+  ctx.globalAlpha=1;
 }
 
 /* ---------- Particles ---------- */
-const Particles = {
-  items: [],
-  spawn(x,y,color,dx=0, dir=-1, life=0.6){
-    this.items.push({
-      x,y, vx: (rand(-2,1)+dx)*dir, vy: rand(-2, -0.5),
-      a: 1, color, life
-    });
-  },
-  update(){
-    this.items = this.items.filter(p=>{
-      p.vx *= 0.99; p.vy += 0.12;
-      p.x += p.vx; p.y += p.vy;
-      p.life -= dt;
-      p.a = Math.max(0, p.life/0.6);
-      return p.life>0;
-    });
-  },
-  draw(){
-    for (const p of this.items){
-      ctx.globalAlpha = p.a;
-      ctx.fillStyle = p.color;
-      ctx.fillRect(p.x, p.y, 6, 6);
-      ctx.globalAlpha = 1;
-    }
-  }
+const Particles={items:[], spawn(x,y,c,dx=0,dir=-1,life=.6){this.items.push({x,y,vx:(rand(-2,1)+dx)*dir,vy:rand(-2,-.5),a:1,c,life});},
+  update(){this.items=this.items.filter(p=>{p.vx*=.99;p.vy+=.12;p.x+=p.vx;p.y+=p.vy;p.life-=dt;p.a=Math.max(0,p.life/.6);return p.life>0;});},
+  draw(){for(const p of this.items){ctx.globalAlpha=p.a; ctx.fillStyle=p.c; ctx.fillRect(p.x,p.y,6,6);} ctx.globalAlpha=1;}
 };
 
-/* ---------- Collision ---------- */
-function collide(a,b){
-  return !(a.x+a.w<b.x || a.x>b.x+b.w || a.y+a.h<b.y || a.y>b.y+b.h);
-}
+/* ---------- Collisions ---------- */
+function collide(a,b){return !(a.x+a.w<b.x||a.x>b.x+b.w||a.y+a.h<b.y||a.y>b.y+b.h);}
 
-/* ---------- Spawning logic ---------- */
+/* ---------- Spawning ---------- */
 function spawnObstacle(){
-  // gap depends on speed & difficulty
-  const minGap = Math.max(220 - difficulty*6, 120);
-  const maxGap = Math.max(380 - difficulty*4, 180);
-  const lastX = obstacles.length? obstacles[obstacles.length-1].x : W+400;
-  const nx = Math.max(W + rand(minGap, maxGap), lastX + rand(minGap, maxGap));
-
-  // type mix evolves with difficulty
-  let t = 0;
-  const r = Math.random();
-  if (r<0.5) t=0;
-  else if (r<0.8) t=1;
-  else if (r<0.95) t=2;
-  else t=3;
-
-  obstacles.push(new Obstacle(nx, t));
+  const minGap=Math.max(220-difficulty*6,120);
+  const maxGap=Math.max(380-difficulty*4,180);
+  const lastX=obstacles.length?obstacles[obstacles.length-1].x:W+400;
+  const nx=Math.max(W+rand(minGap,maxGap), lastX+rand(minGap,maxGap));
+  let t=0; const r=Math.random(); if(r<.5)t=0; else if(r<.8)t=1; else if(r<.95)t=2; else t=3;
+  obstacles.push(new Obstacle(nx,t));
 }
 
-/* ---------- Game Loop ---------- */
-function resetGame(){
-  score = 0;
-  speed = 8;
-  difficulty = 1;
-  spawnTimer = 0;
-  obstacles.length = 0;
-  player.reset();
-  gameOver = false;
-}
+/* ---------- Loop ---------- */
+function resetGame(){ score=0; speed=8; difficulty=1; spawnT=0; obstacles.length=0; player.reset(); over=false; }
 function step(ts){
-  if (!running) { last = ts; requestAnimationFrame(step); return; }
-  dt = Math.min(0.033, (ts - last)/1000); // cap dt
-  last = ts;
+  if(!running){ last=ts; requestAnimationFrame(step); return; }
+  dt=Math.min(.033,(ts-last)/1000); last=ts;
 
-  // difficulty growth
-  difficulty += dt*0.75;
-  speed = lerp(speed, 8 + difficulty*1.25, 0.02);
+  difficulty += dt*.75;
+  speed = lerp(speed, 8 + difficulty*1.25, .02);
 
-  // spawn obstacles
-  spawnTimer -= dt;
-  if (spawnTimer<=0){
-    spawnObstacle();
-    // dynamic spawn interval
-    const base = clamp(1.2 - difficulty*0.02, 0.36, 1.2);
-    spawnTimer = base + rand(0, 0.25);
-  }
+  spawnT -= dt; if(spawnT<=0){ spawnObstacle(); const base=clamp(1.2-difficulty*.02,.36,1.2); spawnT=base+rand(0,.25); }
 
-  // update world
-  sky.draw();
-  layerBack.update(); layerBack.draw();
-  layerMid.update();  layerMid.draw();
-  layerFore.update(); layerFore.draw();
+  drawBG();
 
-  // street ground
-  drawStreet();
-
-  // entities
-  for (const ob of obstacles){ ob.update(); ob.draw(); }
+  for(const o of obstacles){o.update(); o.draw();}
   player.update(); player.draw();
-
-  // particles
   Particles.update(); Particles.draw();
 
-  // collisions
-  const pb = player.bbox();
-  for (const ob of obstacles){
-    if (collide(pb, ob.bbox())){
-      doGameOver();
-      break;
-    }
-  }
+  const pb=player.bbox();
+  for(const o of obstacles){ if(collide(pb,o.bbox())){ return gameOver(); } }
 
-  // trim obstacles
-  while (obstacles.length && obstacles[0].x + obstacles[0].w < -50) obstacles.shift();
+  while(obstacles.length && obstacles[0].x+obstacles[0].w<-50) obstacles.shift();
 
-  // score increments with distance too
-  score += Math.floor(dt * (20 + speed*2));
-
-  // UI
-  drawBanner();
-  document.getElementById('score').textContent = score.toString();
-
+  score += Math.floor(dt*(20+speed*2));
+  updateHUD();
   requestAnimationFrame(step);
 }
 
-function drawStreet(){
-  const baseY = groundY + player.h;
-  // asphalt
-  ctx.fillStyle = '#f3f5fb';
-  ctx.fillRect(0, baseY, W, 180);
-  // center line
-  ctx.fillStyle = 'rgba(19,39,102,0.12)';
-  for(let i=0;i<W;i+=80){
-    ctx.fillRect((i - (now()*0.2)%80), baseY+70, 48, 6);
-  }
-  // red curb
-  ctx.fillStyle = BRAND_RED+'aa';
-  ctx.fillRect(0, baseY-10, W, 10);
-}
+/* ---------- UI ---------- */
+const startPanel=document.getElementById('startPanel');
+const overPanel =document.getElementById('overPanel');
+const lbPanel   =document.getElementById('lbPanel');
+const scoreEl=document.getElementById('score'), bestEl=document.getElementById('best');
+const finalScore=document.getElementById('finalScore'), finalBest=document.getElementById('finalBest');
+const nickBadge=document.getElementById('nickBadge'), toast=document.getElementById('toast');
 
-function drawBanner(){
-  // subtle neon portal behind player when speed increases
-  const t = now()*0.002;
-  const r = 50 + Math.sin(t)*6;
-  ctx.strokeStyle = BRAND_BLUE+'66';
-  ctx.beginPath();
-  ctx.ellipse(player.x+30, player.y+30, r, r*0.65, 0, 0, Math.PI*2);
-  ctx.stroke();
-}
+function show(panel){ startPanel.style.display='none'; overPanel.style.display='none'; lbPanel.style.display='none'; panel.style.display=''; }
+function toastMsg(t){ toast.textContent=t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1100); }
 
-/* ---------- Panels & UI ---------- */
-const startPanel = document.getElementById('startPanel');
-const overPanel  = document.getElementById('overPanel');
-const lbPanel    = document.getElementById('lbPanel');
-const scoreEl = document.getElementById('score');
-const bestEl  = document.getElementById('best');
-const finalScore = document.getElementById('finalScore');
-const finalBest  = document.getElementById('finalBest');
-const nickBadge = document.getElementById('nickBadge');
-const toast = document.getElementById('toast');
+function setNick(n){ const safe=(n||'').toString().trim().slice(0,20).replace(/[^A-Za-z0-9 _.-]/g,''); state.nick = safe || 'Player'; nickBadge.textContent='👤 Ник: '+state.nick; store.saveState({...state}); }
+function ensureNick(){ if(!state.nick) setNick('Player'); nickBadge.textContent='👤 Ник: '+(state.nick||'Player'); }
 
-function showToast(txt){
-  toast.textContent = txt;
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'), 1100);
-}
+function startGame(){ show(startPanel); startPanel.style.display='none'; running=true; resetGame(); ensureNick(); if(SND.actx&&SND.actx.state==='suspended') SND.actx.resume(); requestAnimationFrame(step); }
+function gameOver(){
+  if(over) return; over=true; running=false; SND.hit();
+  for(let i=0;i<24;i++) Particles.spawn(player.x+rand(-10,50), player.y+rand(0,60), chance(.5)?BRAND_RED:BRAND_BLUE, rand(-2,2), -1, rand(.4,.9));
 
-function setNick(n){
-  const nick = (n||'').toString().trim().slice(0,20);
-  const safe = nick.replace(/[^A-Za-z0-9 _.-]/g,'');
-  state.nick = safe||'Player';
-  nickBadge.textContent = '👤 Ник: ' + state.nick;
-  store.save(state);
-}
-function ensureNick(){
-  if (!state.nick) setNick('Player');
-  nickBadge.textContent = '👤 Ник: ' + (state.nick||'Player');
-}
-function startGame(){
-  hideAll();
-  running = true;
-  resetGame();
-  ensureNick();
-  requestAnimationFrame(step);
-}
-function doGameOver(){
-  if (gameOver) return;
-  gameOver = true;
-  running = false;
-  SND.hit();
+  // обновляем локальный BEST (перс.) и общий LB (на ник)
+  if(score > (state.best||0)){ state.best=score; store.saveState(state); toastMsg('Новый рекорд! 🔥'); }
+  store.setBest(state.nick||'Player', score);
 
-  // particles burst
-  for (let i=0;i<24;i++){
-    Particles.spawn(player.x+rand(-10,50), player.y+rand(0,60),
-      chance(0.5)?BRAND_RED:BRAND_BLUE, rand(-2,2), -1, rand(0.4,0.9));
-  }
-
-  // record logic
-  let isNew = false;
-  if (score > best){
-    best = score; isNew = true;
-    state.best = best; store.save(state);
-  }
+  best = state.best||0;
   bestEl.textContent = best.toString();
   finalScore.textContent = score.toString();
   finalBest.textContent = best.toString();
-
-  // leaderboard
-  store.pushLB({nick: state.nick||'Player', score, ts: Date.now()});
-
-  if (isNew) showToast('Новый рекорд! 🔥');
-  overPanel.style.display = '';
-}
-function hideAll(){
-  startPanel.style.display='none';
-  overPanel.style.display='none';
-  lbPanel.style.display='none';
-}
-function openLeaderboard(){
-  hideAll();
-  buildLeaderboard();
-  lbPanel.style.display='';
+  show(overPanel);
 }
 
-/* ---------- Leaderboard DOM ---------- */
-function buildLeaderboard(){
-  const table = document.getElementById('lbTable');
-  const lb = store.loadLB().slice().sort((a,b)=>b.score-a.score).slice(0,200); // показываем топ-200 для скорости
-  let html = '';
-  if (!lb.length){
-    html = '<tr><td class="pos">—</td><td class="nick">Нет данных</td><td class="val">0</td></tr>';
-  } else {
-    lb.forEach((r,i)=>{
-      const me = (r.nick||'') === (state.nick||'Player') && r.score === best;
-      html += `<tr class="${me?'me':''}">
-        <td class="pos">${i+1}</td>
-        <td class="nick">${escapeHtml(r.nick||'Player')}</td>
-        <td class="val">${r.score}</td>
-      </tr>`;
-    });
+function updateHUD(){ scoreEl.textContent=score.toString(); bestEl.textContent=(state.best||0).toString(); }
+
+/* ---------- Leaderboard (per-nick best only) ---------- */
+function buildLB(){
+  const t=document.getElementById('lbTable');
+  const lbObj = store.getLB();
+  const rows = Object.entries(lbObj).map(([nick, v])=>({nick, score:v.score|0, ts:v.ts|0}))
+                 .sort((a,b)=>b.score-a.score).slice(0,200);
+  if(!rows.length){ t.innerHTML='<tr><td class="pos">—</td><td class="nick">Нет данных</td><td class="val">0</td></tr>'; return; }
+  let html=''; for(let i=0;i<rows.length;i++){
+    const r=rows[i], me=(r.nick===(state.nick||'Player'));
+    html+=`<tr class="${me?'me':''}"><td class="pos">${i+1}</td><td class="nick">${escapeHtml(r.nick)}</td><td class="val">${r.score}</td></tr>`;
   }
-  table.innerHTML = html;
+  t.innerHTML=html;
 }
-function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+function escapeHtml(s){return (s+'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
 /* ---------- Controls ---------- */
-let isHolding = false;
-function handlePress(){
-  if (!running){
-    // ignore press when not running
-    return;
-  }
-  player.jumpStart();
-  isHolding = true;
-}
-function handleRelease(){ isHolding = false; }
-
-window.addEventListener('keydown', e=>{
-  if (e.code==='Space' || e.code==='ArrowUp'){
-    e.preventDefault();
-    handlePress();
-  }
-});
-window.addEventListener('keyup', e=>{
-  if (e.code==='Space' || e.code==='ArrowUp'){
-    e.preventDefault();
-    handleRelease();
-  }
-});
-canvas.addEventListener('pointerdown', ()=>handlePress());
-window.addEventListener('pointerup', ()=>handleRelease());
+let holding=false;
+function press(){ if(!running) return; player.startJump(); holding=true; }
+function release(){ holding=false; }
+window.addEventListener('keydown',e=>{ if(e.code==='Space'||e.code==='ArrowUp'){ e.preventDefault(); press(); } });
+window.addEventListener('keyup',e=>{ if(e.code==='Space'||e.code==='ArrowUp'){ e.preventDefault(); release(); } });
+cvs.addEventListener('pointerdown', press); window.addEventListener('pointerup', release);
+(function holdLoop(){ if(running) player.holdJump(holding); requestAnimationFrame(holdLoop); })();
 
 /* ---------- Buttons ---------- */
-document.getElementById('startBtn').addEventListener('click', ()=>{
-  const v = document.getElementById('nickInput').value;
-  if (v) setNick(v);
-  startGame();
-  // resume audio
-  if (SND.actx && SND.actx.state==='suspended') SND.actx.resume();
-});
-document.getElementById('openLbBtn').addEventListener('click', openLeaderboard);
-document.getElementById('lbBtn2').addEventListener('click', openLeaderboard);
-document.getElementById('retryBtn').addEventListener('click', ()=>{
-  startGame();
-});
-document.getElementById('backBtn').addEventListener('click', ()=>{
-  hideAll(); startPanel.style.display='';
-});
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  store.reset();
-  state.nick=''; state.best=0; best=0;
-  ensureNick(); bestEl.textContent='0';
-  buildLeaderboard();
-  showToast('Сброшено (локально)');
-});
-document.getElementById('renameBtn').addEventListener('click', ()=>{
-  const n = prompt('Новый ник (до 20 символов):', state.nick||'Player');
-  if (n!==null){
-    setNick(n);
-    buildLeaderboard();
-  }
-});
+document.getElementById('startBtn').onclick=()=>{ const v=document.getElementById('nickInput').value; if(v) setNick(v); startGame(); };
+document.getElementById('openLbBtn').onclick=()=>{ buildLB(); show(lbPanel); };
+document.getElementById('btnLb').onclick=()=>{ buildLB(); show(lbPanel); };
+document.getElementById('lbBtn2').onclick=()=>{ buildLB(); show(lbPanel); };
+document.getElementById('retryBtn').onclick=()=>{ startGame(); };
+document.getElementById('backBtn').onclick=()=>{ show(startPanel); };
+document.getElementById('resetBtn').onclick=()=>{ store.reset(); state.nick=''; state.best=0; best=0; ensureNick(); bestEl.textContent='0'; buildLB(); toastMsg('Сброшено локально'); };
+document.getElementById('renameBtn').onclick=()=>{ const n=prompt('Новый ник (до 20 символов):', state.nick||'Player'); if(n!==null){ setNick(n); buildLB(); } };
 
 /* ---------- Init ---------- */
-bestEl.textContent = best.toString();
-ensureNick();
-Clouds.init();
-
-// Allow variable jump height while holding
-(function holdLoop(){
-  if (running) player.jumpHoldTick(isHolding);
-  requestAnimationFrame(holdLoop);
-})();
-
-// Start loop
+ensureNick(); bestEl.textContent=(state.best||0).toString(); updateHUD(); buildLB();
 requestAnimationFrame(step);
-
-/* ---------- Fancy: wake audio on first user interaction ---------- */
-window.addEventListener('click', ()=>{
-  if (SND.actx && SND.actx.state==='suspended') SND.actx.resume();
-},{once:true});
-
-/* ---------- Extra: visibility pause ---------- */
-document.addEventListener('visibilitychange', ()=>{
-  if (document.hidden){ running=false; }
-});
-
-/* ---------- END ---------- */
 </script>
 </body>
 </html>
