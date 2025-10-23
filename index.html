@@ -12,74 +12,69 @@
     --ink:#0f172a;
   }
   html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  .wrap{display:flex;align-items:center;justify-content:center;height:100%;padding:0;gap:24px;flex-direction:column}
-  .panel{position:relative;width:min(96vw,1100px);display:flex;gap:16px;align-items:center;justify-content:space-between}
-  canvas{background:var(--bg);display:block;width:100%;height:auto;box-shadow:0 12px 40px rgba(0,0,0,.08);border-radius:18px;image-rendering:pixelated}
-  .hud{position:absolute;inset:0;pointer-events:none}
-  .score{position:absolute;top:20px;right:28px;font-weight:800;font-size:28px;letter-spacing:.5px;
-         background:rgba(255,255,255,.7);backdrop-filter:blur(6px);
-         border-radius:12px;padding:8px 14px;border:1px solid rgba(0,0,0,.06)}
+  .wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;min-height:100svh;padding:12px}
+  .stage{position:relative;width:min(100vw, 1100px);aspect-ratio:16/9;touch-action:none}
+  canvas{background:var(--bg);display:block;width:100%;height:100%;box-shadow:0 12px 40px rgba(0,0,0,.08);border-radius:18px;image-rendering:pixelated}
+  .hud{position:absolute;inset:0;pointer-events:none} /* HUD сам клики не ловит... */
+  .score{position:absolute;top:14px;right:16px;font-weight:800;font-size:22px;letter-spacing:.3px;
+         background:rgba(255,255,255,.7);backdrop-filter:saturate(140%) blur(4px);
+         border-radius:12px;padding:6px 10px;border:1px solid rgba(0,0,0,.06)}
   .start-overlay,.gameover{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;
-    gap:16px;background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.6));
-    backdrop-filter: blur(6px);
+    gap:14px;background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.7));
+    backdrop-filter: blur(4px);
+    padding:12px; text-align:center;
+    pointer-events:auto; /* FIX: а вот оверлеи кликабельные */
   }
-  .title{font-weight:900;font-size:42px;color:var(--team-blue);letter-spacing:.5px}
-  .subtitle{opacity:.8}
+  .title{font-weight:900;font-size:34px;color:var(--team-blue);letter-spacing:.3px}
+  .subtitle{opacity:.85;max-width:90%}
   .row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
   input[type="text"]{
-    width:280px;appearance:none;border-radius:14px;border:2px solid var(--team-blue);
-    padding:12px 14px;font-size:18px;font-weight:700;color:var(--team-blue);outline:none;background:#fff;
+    width:min(70vw,280px);appearance:none;border-radius:14px;border:2px solid var(--team-blue);
+    padding:12px 14px;font-size:18px;font-weight:700;color:var(--team-blue);outline:none;background:#fff;pointer-events:auto
   }
   button{
     appearance:none;border:0;background:var(--team-red);color:#fff;font-weight:900;
     padding:12px 18px;border-radius:14px;font-size:18px;letter-spacing:.3px;
-    box-shadow:0 8px 20px rgba(201,48,31,.25);cursor:pointer;transition:transform .08s ease, filter .15s ease;
+    box-shadow:0 8px 20px rgba(201,48,31,.25);cursor:pointer;transition:transform .08s ease, filter .15s ease;pointer-events:auto
   }
   button:disabled{filter:grayscale(1) brightness(.9);cursor:not-allowed}
   button:active{transform:translateY(1px)}
   .leader{
-    width:min(96vw,1100px);
-    border:1px solid rgba(0,0,0,.06);
-    border-radius:16px;padding:14px 16px;box-shadow:0 10px 28px rgba(0,0,0,.05);
-    background:#fff;
+    width:min(100vw,1100px);border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:12px 14px;
+    box-shadow:0 10px 28px rgba(0,0,0,.05);background:#fff
   }
   .leader h3{margin:0 0 8px 0;font-size:18px;color:var(--team-blue)}
-  .table{display:grid;grid-template-columns:56px 1fr 120px;gap:8px 12px;align-items:center}
+  .table{display:grid;grid-template-columns:48px 1fr 110px;gap:6px 10px;align-items:center}
   .thead{opacity:.6;font-weight:800}
-  .cell{padding:6px 8px;border-radius:10px}
+  .cell{padding:6px 6px;border-radius:10px}
   .rank{font-weight:900;color:var(--team-blue)}
-  .nick{font-weight:800}
+  .nick{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pts{font-weight:900;text-align:right;color:var(--team-red)}
   .hint{font-size:12px;opacity:.65}
-  /* Responsive scale holder to preserve 16:9 while fitting viewport */
-  .stage{position:relative; width:min(96vw, 1100px); aspect-ratio:16/9;}
-  .stage canvas, .stage .hud{position:absolute; inset:0}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="stage">
+    <div class="stage" id="stage">
       <canvas id="game" width="1920" height="1080"></canvas>
-      <div class="hud">
+      <div class="hud" aria-hidden="true">
         <div class="score"><span id="score">0</span></div>
 
-        <div class="start-overlay" id="startUI">
+        <div class="start-overlay" id="startUI" role="dialog" aria-modal="true">
           <div class="title">TEAM Runners</div>
           <div class="subtitle">Перепрыгивай препятствия. Держись как можно дольше.</div>
           <div class="row">
-            <input id="nick" type="text" maxlength="20" placeholder="Ваш ник">
+            <input id="nick" type="text" maxlength="20" inputmode="text" autocomplete="off" placeholder="Ваш ник">
             <button id="startBtn" disabled>Начать</button>
           </div>
-          <div class="hint">Ник обязателен. Управление: пробел / ↑ / тап — прыгать.</div>
+          <div class="hint">Ник обязателен. Управление: пробел / ↑ / тап для прыжка.</div>
         </div>
 
-        <div class="gameover" id="overUI" style="display:none">
+        <div class="gameover" id="overUI" style="display:none" role="dialog" aria-modal="true">
           <div class="title">Игра окончена</div>
           <div class="subtitle">Счёт: <b id="finalScore">0</b> • Рекорд: <b id="bestScore">0</b></div>
-          <div class="row">
-            <button id="againBtn">Играть ещё раз</button>
-          </div>
+          <div class="row"><button id="againBtn">Играть ещё раз</button></div>
         </div>
       </div>
     </div>
@@ -90,473 +85,15 @@
         <div class="cell">#</div><div class="cell">Ник</div><div class="cell" style="text-align:right">Очки</div>
       </div>
       <div id="leaderRows" class="table"></div>
-      <div class="hint">Сохраняется локально на устройстве. У каждого ника хранится один лучший результат.</div>
+      <div class="hint">Сохраняется локально. Для каждого ника хранится один лучший результат.</div>
     </div>
   </div>
 
 <script>
-/* ========================
-   TEAM Runners — single file
-   ======================== */
-
 (() => {
-  const W = 1920, H = 1080;
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  const scoreEl = document.getElementById('score');
-  const startUI = document.getElementById('startUI');
-  const overUI = document.getElementById('overUI');
-  const startBtn = document.getElementById('startBtn');
-  const againBtn = document.getElementById('againBtn');
-  const nickInput = document.getElementById('nick');
-  const finalScoreEl = document.getElementById('finalScore');
-  const bestScoreEl = document.getElementById('bestScore');
-  const leaderRows = document.getElementById('leaderRows');
+  const LOGICAL_W = 1920, LOGICAL_H = 1080;
+  const GROUND_Y = LOGICAL_H - 200;
 
-  // Colors
-  const C = {
-    red: '#C9301F',
-    blue: '#132766',
-    bg: '#ffffff',
-    road: '#0b122a10'
-  };
-
-  // Physics & game params
-  const GRAVITY = 0.9;
-  const JUMP_VELOCITY = -22; // tuned for feel
-  const GROUND_Y = H - 200;
-  const OBSTACLE_MIN_GAP = 280; // pixels, min distance between obstacle starts
-  const OBSTACLE_MAX_GAP = 560; // not too far
-  const OBSTACLE_BASE_WIDTH = 60; // pixel-style columns
-  const OBSTACLE_MAX_HEIGHT = 180;
-
-  // Difficulty curve
-  let baseSpeed = 10.5;      // initial world speed (pixels/frame)
-  const maxSpeed = 26;       // cap, not displayed
-  const accelPerSecond = 0.035; // how quickly speed ramps up
-  const spawnTightenPerMin = 0.12; // frequency up over time
-
-  // Average speed tracker (not shown)
-  let avgSpeed = 0, avgSamples = 0;
-
-  // Player (pixel-ish little guy)
-  const player = {
-    x: 240,
-    y: GROUND_Y - 90,
-    vy: 0,
-    w: 64,
-    h: 90,
-    onGround: true,
-    animT: 0
-  };
-
-  // Parallax layers
-  const layers = [
-    { speed: 0.2, color: '#eef2ff', type:'sky' },
-    { speed: 0.6, color: '#d9e0ff', type:'far' },
-    { speed: 1.0, color: '#c7d2fe', type:'mid' },
-    { speed: 1.6, color: '#b3c0fb', type:'near' },
-  ];
-  const layerOffsets = layers.map(_ => 0);
-
-  // Obstacles
-  let obstacles = [];
-
-  // State
-  let running = false;
-  let score = 0;
-  let highScore = 0;
-  let lastSpawnX = 0;
-  let tPrev = performance.now();
-  let worldX = 0;
-  let audioCtx = null;
-  let nick = '';
-
-  // Leaderboard storage (nick -> bestScore)
-  const LB_KEY = 'team_runners_leaderboard_v2';
-  function loadLB(){
-    try {
-      const raw = localStorage.getItem(LB_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch(e){ return {}; }
-  }
-  function saveLB(map){
-    try { localStorage.setItem(LB_KEY, JSON.stringify(map)); } catch(e){}
-  }
-  function upsertLB(nick, val){
-    const lb = loadLB();
-    const prev = lb[nick] || 0;
-    if (val > prev){ lb[nick] = val; saveLB(lb); }
-    renderLB();
-  }
-  function renderLB(){
-    const lb = loadLB();
-    const rows = Object.entries(lb).map(([k,v]) => ({nick:k, pts:v}));
-    rows.sort((a,b)=> b.pts - a.pts);
-    const top = rows.slice(0,15);
-    leaderRows.innerHTML = '';
-    // header rows already above; now data:
-    top.forEach((r,i)=>{
-      leaderRows.insertAdjacentHTML('beforeend', `
-        <div class="cell rank">${i+1}</div>
-        <div class="cell nick">${escapeHTML(r.nick)}</div>
-        <div class="cell pts">${r.pts.toLocaleString('ru-RU')}</div>
-      `);
-    });
-  }
-  function escapeHTML(s){
-    return (s+'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-  }
-
-  // Input guard: nickname required
-  nickInput.addEventListener('input', ()=>{
-    const v = nickInput.value.trim();
-    startBtn.disabled = v.length < 1;
-  });
-
-  // Start flow
-  startBtn.addEventListener('click', ()=>{
-    const v = nickInput.value.trim();
-    if (!v) return;
-    nick = v;
-    startGame();
-  });
-  againBtn.addEventListener('click', ()=>{
-    startGame();
-  });
-
-  // Controls
-  function requestJump(){
-    if (!running) return;
-    if (player.onGround){
-      player.vy = JUMP_VELOCITY;
-      player.onGround = false;
-      beepJump();
-    }
-  }
-  window.addEventListener('keydown', e=>{
-    if (e.code === 'Space' || e.code === 'ArrowUp') {
-      e.preventDefault();
-      requestJump();
-    }
-  }, {passive:false});
-  canvas.addEventListener('pointerdown', ()=> requestJump(), {passive:true});
-
-  // Audio (simple beeps)
-  function initAudio(){
-    if (audioCtx) return;
-    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; }
-  }
-  function beep(freq=440, dur=0.08, type='square', gain=0.05){
-    if (!audioCtx) return;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.value = gain;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    setTimeout(()=>{ o.stop(); }, dur*1000);
-  }
-  function beepJump(){ initAudio(); beep(560, .06, 'square', .035); }
-  function beepMilestone(){ initAudio(); beep(740, .07, 'sawtooth', .045); setTimeout(()=>beep(880, .07, 'sawtooth', .045), 80); }
-  function beepDeath(){ initAudio(); beep(220, .18, 'triangle', .06); }
-
-  // Game core
-  function reset(){
-    running = true;
-    startUI.style.display = 'none';
-    overUI.style.display = 'none';
-    score = 0;
-    baseSpeed = 10.5;
-    avgSpeed = 0; avgSamples = 0;
-    obstacles = [];
-    player.y = GROUND_Y - player.h;
-    player.vy = 0;
-    player.onGround = true;
-    player.animT = 0;
-    worldX = 0;
-    lastSpawnX = -OBSTACLE_MIN_GAP;
-    tPrev = performance.now();
-    scoreEl.textContent = '0';
-  }
-  function startGame(){
-    reset();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    loop();
-  }
-
-  function loop(){
-    if (!running) return;
-    const tNow = performance.now();
-    const dt = Math.min(40, tNow - tPrev) / 16.6667; // normalize to ~1 per frame (60fps baseline)
-    tPrev = tNow;
-
-    // difficulty ramps over time (dt ~ frames)
-    baseSpeed = Math.min(maxSpeed, baseSpeed + accelPerSecond * dt);
-    const worldSpeed = baseSpeed;
-
-    // avg speed tracker (not displayed)
-    avgSpeed = (avgSpeed*avgSamples + worldSpeed) / (avgSamples+1); avgSamples++;
-
-    updateParallax(worldSpeed, dt);
-    updateObstacles(worldSpeed, dt);
-    updatePlayer(worldSpeed, dt);
-
-    // Scoring by distance survived
-    score += Math.floor(worldSpeed * dt);
-    if (score % 1000 === 0) { beepMilestone(); }
-    scoreEl.textContent = score.toLocaleString('ru-RU');
-
-    render();
-
-    requestAnimationFrame(loop);
-  }
-
-  function updateParallax(spd, dt){
-    layers.forEach((ly, i)=>{
-      layerOffsets[i] = (layerOffsets[i] + spd * ly.speed * dt) % W;
-    });
-    worldX += spd * dt;
-  }
-
-  function spawnObstacleIfNeeded(){
-    const dxSince = worldX - lastSpawnX;
-    // Make spawning tighter over minutes
-    const minutes = (worldX / (60*60*baseSpeed)) || 0;
-    const tighten = 1 + spawnTightenPerMin * minutes;
-    const minGap = Math.max(220, OBSTACLE_MIN_GAP / tighten);
-    const maxGap = Math.max(minGap+80, OBSTACLE_MAX_GAP / Math.sqrt(tighten));
-
-    if (dxSince >= minGap){
-      // Avoid double obstacles: ensure previous obstacle's trailing edge is clear
-      const last = obstacles[obstacles.length-1];
-      if (last){
-        const lastTailX = last.x + last.w;
-        if ( (W - lastTailX) < minGap ) return; // too close, wait
-      }
-      // Spawn one column or small set merged as one hitbox (still "single" obstacle)
-      const width = OBSTACLE_BASE_WIDTH + Math.floor(Math.random()*40);
-      const height = 80 + Math.floor(Math.random()*(OBSTACLE_MAX_HEIGHT-80));
-      obstacles.push({
-        x: W + 10,
-        y: GROUND_Y - height,
-        w: width,
-        h: height,
-        color: Math.random()<0.6 ? C.blue : C.red,
-        passed:false
-      });
-      lastSpawnX = worldX + Math.floor(minGap + Math.random()*(maxGap-minGap));
-    }
-  }
-
-  function updateObstacles(spd, dt){
-    spawnObstacleIfNeeded();
-    for (let i=0;i<obstacles.length;i++){
-      const o = obstacles[i];
-      o.x -= spd * dt;
-      // score on pass (silent)
-      if (!o.passed && (o.x + o.w) < player.x){
-        o.passed = true;
-      }
-    }
-    // cleanup
-    obstacles = obstacles.filter(o => o.x + o.w > -20);
-  }
-
-  function updatePlayer(spd, dt){
-    // gravity
-    player.vy += GRAVITY * dt;
-    player.y += player.vy * dt;
-
-    // ground collision
-    const groundTop = GROUND_Y - player.h;
-    if (player.y >= groundTop){
-      player.y = groundTop;
-      player.vy = 0;
-      player.onGround = true;
-    } else {
-      player.onGround = false;
-    }
-
-    // animate run
-    player.animT += dt * (player.onGround ? Math.max(1, spd/6) : 0.6);
-
-    // collisions
-    for (const o of obstacles){
-      if (rectsOverlap(player.x, player.y, player.w, player.h, o.x, o.y, o.w, o.h)){
-        // Dead
-        beepDeath();
-        gameOver();
-        return;
-      }
-    }
-  }
-
-  function rectsOverlap(ax,ay,aw,ah, bx,by,bw,bh){
-    return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
-  }
-
-  // Rendering
-  function render(){
-    // clear
-    ctx.clearRect(0,0,W,H);
-
-    // sky bg
-    ctx.fillStyle = '#f7faff';
-    ctx.fillRect(0,0,W,H);
-
-    // parallax bands (city vibe)
-    layers.forEach((ly, i)=>{
-      drawBand(ly, layerOffsets[i], i);
-    });
-
-    // road
-    drawRoad();
-
-    // obstacles
-    obstacles.forEach(o=> drawObstacle(o));
-
-    // player
-    drawPlayer();
-  }
-
-  function drawBand(layer, offset, idx){
-    const h = [H*0.20, H*0.26, H*0.34, H*0.44][idx];
-    const baseY = GROUND_Y - h;
-    ctx.save();
-    // tinted stripe
-    ctx.fillStyle = layer.color;
-    ctx.fillRect(0, baseY, W, h);
-
-    // silhouettes of buildings as repeating blocks
-    const stride = 320;
-    for (let x = -stride; x < W+stride; x += stride){
-      const bx = x - (offset % stride);
-      const w = stride * 0.8;
-      const bh = h * (0.5 + ( (x/stride)%3===0 ? 0.3:0.2 ));
-      ctx.fillStyle = shade(layer.color, -8 - idx*4);
-      ctx.fillRect(bx, baseY + (h - bh), w, bh);
-
-      // windows dots
-      const winY = baseY + (h - bh) + 18;
-      for (let wy=winY; wy<baseY + h - 20; wy+=24){
-        for (let wx=bx+18; wx<bx+w-18; wx+=26){
-          if (Math.random() < 0.12) {
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            ctx.fillRect(wx, wy, 4, 8);
-          }
-        }
-      }
-    }
-    ctx.restore();
-  }
-
-  function shade(hex, pct){ // negative darken
-    const c = parseInt(hex.slice(1),16);
-    let r=(c>>16)&255, g=(c>>8)&255, b=c&255;
-    r = Math.min(255, Math.max(0, r + Math.round(255*pct/100)));
-    g = Math.min(255, Math.max(0, g + Math.round(255*pct/100)));
-    b = Math.min(255, Math.max(0, b + Math.round(255*pct/100)));
-    return '#'+(r<<16 | g<<8 | b).toString(16).padStart(6,'0');
-  }
-
-  function drawRoad(){
-    // base
-    ctx.fillStyle = '#e9ecf5';
-    ctx.fillRect(0, GROUND_Y, W, H-GROUND_Y);
-
-    // lane stripes parallax
-    const off = (layerOffsets[3]*2) % 120;
-    ctx.fillStyle = 'rgba(19,39,102,0.12)';
-    for (let x=-120;x<W+120;x+=120){
-      ctx.fillRect(x - off, GROUND_Y+80, 60, 10);
-    }
-  }
-
-  function drawObstacle(o){
-    // simple chunky bollard style with tiny roof
-    ctx.fillStyle = o.color;
-    ctx.fillRect(Math.floor(o.x), Math.floor(o.y), o.w, o.h);
-    ctx.fillStyle = shade(o.color, -15);
-    ctx.fillRect(Math.floor(o.x)-2, Math.floor(o.y)-6, o.w+4, 8);
-    // subtle shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.10)';
-    ctx.fillRect(Math.floor(o.x)+6, Math.floor(o.y)+o.h, o.w-12, 8);
-  }
-
-  function drawPlayer(){
-    const x = Math.floor(player.x), y = Math.floor(player.y);
-    // legs animation
-    const step = Math.floor(player.animT)%6;
-    // body (clothes) in TEAM red
-    ctx.fillStyle = C.red;
-    ctx.fillRect(x+16, y+18, 32, 46); // torso
-    // head
-    ctx.fillStyle = '#ffd7bd';
-    ctx.fillRect(x+22, y, 20, 18);
-    // eyes
-    ctx.fillStyle = '#222';
-    ctx.fillRect(x+28, y+6, 3, 3);
-    // arms (red sleeves)
-    ctx.fillStyle = C.red;
-    ctx.fillRect(x+8,  y+24, 8, 12);
-    ctx.fillRect(x+48, y+24, 8, 12);
-    // legs (pixel jog)
-    ctx.fillStyle = C.blue;
-    if (player.onGround){
-      if (step<3){
-        ctx.fillRect(x+18, y+64, 10, 24);
-        ctx.fillRect(x+36, y+64, 10, 24);
-      } else {
-        ctx.fillRect(x+14, y+64, 10, 26);
-        ctx.fillRect(x+40, y+64, 10, 22);
-      }
-    } else {
-      ctx.fillRect(x+18, y+64, 10, 22);
-      ctx.fillRect(x+36, y+64, 10, 22);
-    }
-    // shoes (tiny)
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x+16, y+86, 16, 6);
-    ctx.fillRect(x+36, y+86, 16, 6);
-    // subtle shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.10)';
-    ctx.beginPath();
-    ctx.ellipse(x+player.w/2, GROUND_Y+6, 40, 10, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  function gameOver(){
-    running = false;
-    // update leaderboard (one record per nick)
-    upsertLB(nick, score);
-
-    // show overlay
-    finalScoreEl.textContent = score.toLocaleString('ru-RU');
-    const best = Math.max(score, (loadLB()[nick]||0));
-    bestScoreEl.textContent = best.toLocaleString('ru-RU');
-    overUI.style.display = 'flex';
-  }
-
-  // Initial render of leaderboard
-  renderLB();
-
-  // Prevent spacebar from scrolling page on focused buttons
-  window.addEventListener('keydown', e=>{
-    if ((e.code==='Space'||e.code==='ArrowUp') && ['INPUT','BUTTON'].includes(document.activeElement.tagName)) {
-      e.preventDefault();
-    }
-  });
-
-  // Utility: fit canvas crisp to container (handled via CSS aspect-ratio). Canvas internal is 1920x1080.
-
-  // Kick audio context on first gesture
-  document.addEventListener('pointerdown', ()=>initAudio(), {once:true});
-
-  // Start screen stays until valid nick + Start
-
-})();
-</script>
-</body>
-</html>
+  // спокойные параметры
+  let baseSpeed = 8.0, maxSpeed = 20.0, accelPerSecond = 0.020;
+  const OBSTACLE_MIN_GAP = 320, OBSTACLE_MAX_GAP = 600, OBSTACLE_BASE_WIDTH = 58, OBSTACLE_MAX_HEIG
